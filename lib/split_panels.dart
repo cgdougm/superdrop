@@ -58,6 +58,8 @@ class _SplitPanelsState extends State<SplitPanels> {
     });
   }
 
+  void setExternalData(String data) => setState(() => hoveringData = data);
+
   void updateDropPreview(PanelLocation update) =>
       setState(() => dropPreview = update);
 
@@ -78,6 +80,7 @@ class _SplitPanelsState extends State<SplitPanels> {
               top: 0,
               child: MyDropRegion(
                 onDrop: drop,
+                setExternalData: setExternalData,
                 updateDropPreview: updateDropPreview,
                 childSize: itemSize,
                 columns: widget.columns,
@@ -110,6 +113,7 @@ class _SplitPanelsState extends State<SplitPanels> {
               bottom: 0,
               child: MyDropRegion(
                 onDrop: drop,
+                setExternalData: setExternalData,
                 updateDropPreview: updateDropPreview,
                 childSize: itemSize,
                 columns: widget.columns,
@@ -173,7 +177,7 @@ class ItemPanel extends StatelessWidget {
     if (dragStartCopy != null &&
         dropPreviewCopy != null &&
         dragStartCopy.panel == dropPreviewCopy.panel) {
-      itemsCopy.removeAt(dragStartCopy!.index);
+      itemsCopy.removeAt(dragStartCopy.index);
       dragStartCopy = null;
     }
     if (dropPreview != null && hoveringData != null) {
@@ -206,7 +210,7 @@ class ItemPanel extends StatelessWidget {
               height: 200,
               decoration: BoxDecoration(
                 color: Colors.grey.shade100,
-                borderRadius: BorderRadius.all(Radius.circular(12)),
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
               ),
               child: child,
             );

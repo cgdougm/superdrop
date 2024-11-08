@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:superdrop/types.dart';
+import 'dart:convert';
 
 class MyDropRegion extends StatefulWidget {
   const MyDropRegion({
@@ -9,6 +10,7 @@ class MyDropRegion extends StatefulWidget {
     required this.columns,
     required this.panel,
     required this.onDrop,
+    required this.setExternalData,
     required this.updateDropPreview,
     required this.child,
   });
@@ -18,6 +20,7 @@ class MyDropRegion extends StatefulWidget {
   final Panel panel;
   final VoidCallback onDrop;
   final void Function(PanelLocation) updateDropPreview;
+  final void Function(String) setExternalData;
   final Widget child;
 
   @override
@@ -37,6 +40,23 @@ class _MyDropRegionState extends State<MyDropRegion> {
       },
       onPerformDrop: (PerformDropEvent event) async {
         widget.onDrop();
+      },
+      onDropEnter: (DropEvent event) {
+        // TODO: iterate thru all event.session.items
+        if (event.session.items.first.dataReader != null) {
+          final dataReader = event.session.items.first.dataReader!;
+          if (!dataReader.canProvide(Formats.plainTextFile)) {
+            // TODO: Show "unsupported file type" SnackBar 
+            // if any of the dropped files are not plain text
+            return;
+          }
+          dataReader.getFile(
+            Formats.plainTextFile,
+            (value) async {
+              widget.setExternalData(utf8.decode(await value.readAll()));
+            },
+          );
+        }
       },
       child: widget.child,
     );
