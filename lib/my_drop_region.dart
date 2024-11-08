@@ -8,6 +8,7 @@ class MyDropRegion extends StatefulWidget {
     required this.childSize,
     required this.columns,
     required this.panel,
+    required this.onDrop,
     required this.updateDropPreview,
     required this.child,
   });
@@ -15,6 +16,7 @@ class MyDropRegion extends StatefulWidget {
   final Size childSize;
   final int columns;
   final Panel panel;
+  final VoidCallback onDrop;
   final void Function(PanelLocation) updateDropPreview;
   final Widget child;
 
@@ -33,7 +35,9 @@ class _MyDropRegionState extends State<MyDropRegion> {
         _updatePreview(event.position.local);
         return DropOperation.copy;
       },
-      onPerformDrop: (PerformDropEvent event) async {},
+      onPerformDrop: (PerformDropEvent event) async {
+        widget.onDrop();
+      },
       child: widget.child,
     );
   }

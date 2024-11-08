@@ -40,6 +40,24 @@ class _SplitPanelsState extends State<SplitPanels> {
     });
   }
 
+  void drop() {
+    assert(dropPreview != null, 'Can only drop over a known location');
+    assert(hoveringData != null, 'Can only drop when data is being dragged');
+    setState((){
+      if (dragStart != null) {
+        (dragStart!.panel == Panel.upper ? upper : lower).removeAt(dragStart!.index);
+      }
+      if (dropPreview!.panel == Panel.upper) {
+        upper.insert(min(dropPreview!.index, upper.length), hoveringData!);
+      } else {
+        lower.insert(min(dropPreview!.index, lower.length), hoveringData!);
+      }
+      dragStart = null;
+      dropPreview = null;
+      hoveringData = null;
+    });
+  }
+
   void updateDropPreview(PanelLocation update) =>
       setState(() => dropPreview = update);
 
@@ -59,6 +77,7 @@ class _SplitPanelsState extends State<SplitPanels> {
               width: constraints.maxWidth,
               top: 0,
               child: MyDropRegion(
+                onDrop: drop,
                 updateDropPreview: updateDropPreview,
                 childSize: itemSize,
                 columns: widget.columns,
@@ -90,6 +109,7 @@ class _SplitPanelsState extends State<SplitPanels> {
               width: constraints.maxWidth,
               bottom: 0,
               child: MyDropRegion(
+                onDrop: drop,
                 updateDropPreview: updateDropPreview,
                 childSize: itemSize,
                 columns: widget.columns,
