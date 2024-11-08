@@ -46,7 +46,7 @@ class _MyDropRegionState extends State<MyDropRegion> {
         if (event.session.items.first.dataReader != null) {
           final dataReader = event.session.items.first.dataReader!;
           if (!dataReader.canProvide(Formats.plainTextFile)) {
-            // TODO: Show "unsupported file type" SnackBar 
+            // TODO: Show "unsupported file type" SnackBar
             // if any of the dropped files are not plain text
             return;
           }
@@ -63,9 +63,9 @@ class _MyDropRegionState extends State<MyDropRegion> {
   }
 
   void _updatePreview(Offset hoverPosition) {
-  final int row = hoverPosition.dy ~/ widget.childSize.height;
-  final int column = (hoverPosition.dx - (widget.childSize.width / 2)) ~/
-      widget.childSize.width;
+    final int row = hoverPosition.dy ~/ widget.childSize.height;
+    final int column = (hoverPosition.dx - (widget.childSize.width / 2)) ~/
+        widget.childSize.width;
     int newDropIndex = (row * widget.columns) + column;
 
     if (newDropIndex != dropIndex) {

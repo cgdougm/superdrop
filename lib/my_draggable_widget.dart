@@ -16,14 +16,13 @@ class MyDraggableWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DragItemWidget(
-      dragItemProvider: (DragItemRequest request) {
-        onDragStart();
-        final item = DragItem(localData: data);
-        return item;
-      },
-      dragBuilder: (context, child) => Opacity(opacity: 0.8, child: child),
-      allowedOperations: () => [DropOperation.copy],
-      child: DraggableWidget(child: child)
-    );
+        dragItemProvider: (DragItemRequest request) {
+          onDragStart();
+          final item = DragItem(localData: data);
+          return item;
+        },
+        dragBuilder: (context, child) => Opacity(opacity: 0.8, child: child),
+        allowedOperations: () => [DropOperation.copy],
+        child: DraggableWidget(child: child));
   }
 }
