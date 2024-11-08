@@ -1,6 +1,10 @@
+import 'dart:math';
+
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:superdrop/my_draggable_widget.dart';
-import 'types.dart';
+import 'package:superdrop/types.dart';
+import 'package:superdrop/my_drop_region.dart';
 
 class SplitPanels extends StatefulWidget {
   const SplitPanels({
@@ -43,25 +47,34 @@ class _SplitPanelsState extends State<SplitPanels> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // final gutters = widget.columns + 1;
-        // final spaceForColumns = constraints.maxWidth - (gutters * widget.itemSpacing);
-        // final columnWidth = spaceForColumns / widget.columns;
-        // final itemWidth = Size(columnWidth, columnWidth);
+        final gutters = widget.columns + 1;
+        final spaceForColumns =
+            constraints.maxWidth - (gutters * widget.itemSpacing);
+        final columnWidth = spaceForColumns / widget.columns;
+        final itemSize = Size(columnWidth, columnWidth);
         return Stack(
           children: <Widget>[
             Positioned(
               height: constraints.maxHeight / 2,
               width: constraints.maxWidth,
               top: 0,
-              child: ItemPanel(
-                crossAxisCount: widget.columns,
-                items: upper,
-                onDragStart: onDragStart,
-                dragStart: dragStart?.panel == Panel.upper
-                    ? dragStart
-                    : null,
+              child: MyDropRegion(
+                updateDropPreview: updateDropPreview,
+                childSize: itemSize,
+                columns: widget.columns,
                 panel: Panel.upper,
-                spacing: widget.itemSpacing,
+                child: ItemPanel(
+                  crossAxisCount: widget.columns,
+                  items: upper,
+                  onDragStart: onDragStart,
+                  dragStart: dragStart?.panel == Panel.upper ? dragStart : null,
+                  dropPreview:
+                      dropPreview?.panel == Panel.upper ? dropPreview : null,
+                  hoveringData:
+                      dropPreview?.panel == Panel.upper ? hoveringData : null,
+                  panel: Panel.upper,
+                  spacing: widget.itemSpacing,
+                ),
               ),
             ),
             Positioned(
@@ -76,15 +89,23 @@ class _SplitPanelsState extends State<SplitPanels> {
               height: constraints.maxHeight / 2,
               width: constraints.maxWidth,
               bottom: 0,
-              child: ItemPanel(
-                crossAxisCount: widget.columns,
-                items: lower,
-                onDragStart: onDragStart,
-                dragStart: dragStart?.panel == Panel.lower
-                    ? dragStart
-                    : null,
+              child: MyDropRegion(
+                updateDropPreview: updateDropPreview,
+                childSize: itemSize,
+                columns: widget.columns,
                 panel: Panel.lower,
-                spacing: widget.itemSpacing,
+                child: ItemPanel(
+                  crossAxisCount: widget.columns,
+                  items: lower,
+                  onDragStart: onDragStart,
+                  dragStart: dragStart?.panel == Panel.lower ? dragStart : null,
+                  dropPreview:
+                      dropPreview?.panel == Panel.lower ? dropPreview : null,
+                  hoveringData:
+                      dropPreview?.panel == Panel.lower ? hoveringData : null,
+                  panel: Panel.lower,
+                  spacing: widget.itemSpacing,
+                ),
               ),
             ),
           ],
@@ -99,6 +120,8 @@ class ItemPanel extends StatelessWidget {
     super.key,
     required this.crossAxisCount,
     required this.dragStart,
+    required this.dropPreview,
+    required this.hoveringData,
     required this.items,
     required this.onDragStart,
     required this.panel,
@@ -107,6 +130,8 @@ class ItemPanel extends StatelessWidget {
 
   final int crossAxisCount;
   final PanelLocation? dragStart;
+  final PanelLocation? dropPreview;
+  final String? hoveringData;
   final List<String> items;
   final double spacing;
   final Function(PanelLocation) onDragStart;
@@ -114,19 +139,39 @@ class ItemPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final itemsCopy = List<String>.from(items);
     PanelLocation? dragStartCopy;
+    PanelLocation? dropPreviewCopy;
     if (dragStart != null) {
       dragStartCopy = dragStart!.copyWith();
+    }
+    if (dropPreview != null) {
+      dropPreviewCopy = dropPreview!.copyWith(
+        index: min(items.length, dropPreview!.index),
+      );
+    }
+    if (dragStartCopy != null &&
+        dropPreviewCopy != null &&
+        dragStartCopy.panel == dropPreviewCopy.panel) {
+      itemsCopy.removeAt(dragStartCopy!.index);
+      dragStartCopy = null;
+    }
+    if (dropPreview != null && hoveringData != null) {
+      itemsCopy.insert(
+        min(dropPreview!.index, itemsCopy.length),
+        hoveringData!,
+      );
     }
     return GridView.count(
       crossAxisCount: crossAxisCount,
       padding: const EdgeInsets.all(4),
       mainAxisSpacing: spacing,
       crossAxisSpacing: spacing,
-      children: items.asMap().entries.map<Widget>(
+      children: itemsCopy.asMap().entries.map<Widget>(
         (MapEntry<int, String> entry) {
-          Color textColor = entry.key == dragStartCopy?.index
-              ? Colors.black
+          Color textColor = entry.key == dragStartCopy?.index ||
+                  entry.key == dropPreviewCopy?.index
+              ? Colors.red
               : Colors.white;
           Widget child = Center(
             child: Text(
@@ -143,6 +188,15 @@ class ItemPanel extends StatelessWidget {
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.all(Radius.circular(12)),
               ),
+              child: child,
+            );
+          } else if (entry.key == dropPreviewCopy?.index) {
+            child = DottedBorder(
+              borderType: BorderType.RRect,
+              radius: const Radius.circular(20),
+              dashPattern: const [10, 10],
+              color: Colors.grey,
+              strokeWidth: 2,
               child: child,
             );
           } else {
