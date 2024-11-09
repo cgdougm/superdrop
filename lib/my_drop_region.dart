@@ -45,17 +45,29 @@ class _MyDropRegionState extends State<MyDropRegion> {
         // TODO: iterate thru all event.session.items
         if (event.session.items.first.dataReader != null) {
           final dataReader = event.session.items.first.dataReader!;
+          // Check if the file is plain text
           if (!dataReader.canProvide(Formats.plainTextFile)) {
             // TODO: Show "unsupported file type" SnackBar
             // if any of the dropped files are not plain text
             return;
           }
+          // Get the name of the file to display in the UI
           dataReader.getFile(
             Formats.plainTextFile,
             (value) async {
-              widget.setExternalData(utf8.decode(await value.readAll()));
+              widget.setExternalData(value.fileName ?? 'unknown');
             },
           );
+          // Here is theriginal example would read the contents of the file(!)
+          // dataReader.getSuggestedName().then((name) {
+          //   widget.setExternalData(name ?? 'unknown');
+          // });
+          // .getFile(
+          //   Formats.plainTextFile,
+          //   (value) async {
+          //     widget.setExternalData(utf8.decode(await value.readAll()));
+          //   },
+          // );
         }
       },
       child: widget.child,

@@ -41,8 +41,12 @@ class _SplitPanelsState extends State<SplitPanels> {
   }
 
   void drop() {
+    // TODO: handle dropped files more gracefully; 
+    // WARNING: There are ots of edge cases that break.
+    // NOTE: Use Flutter Developer Tools to see these assert() errors
     assert(dropPreview != null, 'Can only drop over a known location');
     assert(hoveringData != null, 'Can only drop when data is being dragged');
+
     setState(() {
       if (dragStart != null) {
         (dragStart!.panel == Panel.upper ? upper : lower)
